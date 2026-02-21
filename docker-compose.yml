@@ -1,0 +1,45 @@
+services:
+  mysql:
+    image: mysql:8.0.38
+    container_name: books-mysql
+    environment:
+      MYSQL_DATABASE: book_mgt
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: book_mgt
+      MYSQL_PASSWORD: book_mgt
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - book-mgt-network
+    healthcheck:
+      test: [ "CMD-SHELL", "mysqladmin ping -h localhost -uroot -proot" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: book-mgt-system
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: book_mgt
+      DB_USERNAME: book_mgt
+      DB_PASSWORD: book_mgt
+    ports:
+      - "8080:8080"
+    networks:
+      - book-mgt-network
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+
+networks:
+  book-mgt-network:
+    driver: bridge
