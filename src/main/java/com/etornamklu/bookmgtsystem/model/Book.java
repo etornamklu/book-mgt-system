@@ -1,6 +1,5 @@
 package com.etornamklu.bookmgtsystem.model;
 
-
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
@@ -17,6 +16,12 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * Entity representing a Book in the system.
+ * <p>
+ * Supports soft-delete via {@link #deletedAt}, optimistic locking via {@link #version},
+ * and auditing with {@link #createdAt} and {@link #updatedAt}.
+ */
 @Entity
 @Table(name = "books")
 @EntityListeners(AuditingEntityListener.class)
@@ -25,32 +30,79 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Book {
+
+    /**
+     * Primary key for the book.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    /**
+     * Version field for optimistic locking.
+     */
+    @Version
+    private Long version;
+
+    /**
+     * Title of the book.
+     */
     @NotBlank
     @Column(nullable = false, length = 150)
     private String title;
 
+    /**
+     * Author of the book.
+     */
     @NotBlank
     @Column(nullable = false, length = 100)
     private String author;
 
+    /**
+     * International Standard Book Number (ISBN), must be unique if present.
+     */
     @Column(length = 20, unique = true)
     private String isbn;
 
+    /**
+     * Price of the book in the local currency.
+     * Must be a positive value.
+     */
     @Positive
     @Column(precision = 10, scale = 2)
     private BigDecimal price;
 
+    /**
+     * Quantity of stock available for this book.
+     * Must be zero or positive.
+     */
     @PositiveOrZero
     private Integer stockQuantity;
 
+    /**
+     * Cover image of the book stored as a binary large object (BLOB).
+     */
+    @Lob
+    private byte[] coverImage;
+
+    /**
+     * Timestamp indicating when the book was soft-deleted.
+     * If null, the book is considered active.
+     */
+    private LocalDateTime deletedAt;
+
+    /**
+     * Timestamp indicating when the book was created.
+     * Automatically set by JPA auditing, not updatable.
+     */
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    /**
+     * Timestamp indicating when the book was last updated.
+     * Automatically set by JPA auditing.
+     */
     @LastModifiedDate
     private LocalDateTime updatedAt;
 }

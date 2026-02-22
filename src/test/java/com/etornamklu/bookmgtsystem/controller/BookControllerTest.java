@@ -5,6 +5,7 @@ import com.etornamklu.bookmgtsystem.dto.request.CreateBookRequestDto;
 import com.etornamklu.bookmgtsystem.dto.request.UpdateBookRequestDto;
 import com.etornamklu.bookmgtsystem.exception.GlobalExceptionHandler;
 import com.etornamklu.bookmgtsystem.exception.ResourceNotFoundException;
+import com.etornamklu.bookmgtsystem.mapper.BookMapper;
 import com.etornamklu.bookmgtsystem.model.Book;
 import com.etornamklu.bookmgtsystem.service.BookService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -70,7 +71,7 @@ class BookControllerTest {
     @Test
     void getAllBooks_shouldReturn200WithPageOfBooks() throws Exception {
         Page<Book> page = new PageImpl<>(List.of(book));
-        when(bookService.findAllByPage(0, 20)).thenReturn(page);
+        when(bookService.findAllByPage(0, 20)).thenReturn(page.map(BookMapper::toDto));
 
         mockMvc.perform(get("/api/v1/books"))
                 .andExpect(status().isOk())
@@ -85,7 +86,7 @@ class BookControllerTest {
     @Test
     void getAllBooks_shouldRespectCustomPageAndLimitParams() throws Exception {
         Page<Book> page = new PageImpl<>(List.of());
-        when(bookService.findAllByPage(2, 5)).thenReturn(page);
+        when(bookService.findAllByPage(2, 5)).thenReturn(page.map(BookMapper::toDto));
 
         mockMvc.perform(get("/api/v1/books").param("page", "2").param("limit", "5"))
                 .andExpect(status().isOk());
@@ -107,7 +108,7 @@ class BookControllerTest {
                 .stockQuantity(10)
                 .build();
 
-        when(bookService.create(any(CreateBookRequestDto.class))).thenReturn(book);
+        when(bookService.create(any(CreateBookRequestDto.class))).thenReturn(BookMapper.toDto(book));
 
         mockMvc.perform(post("/api/v1/books")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -200,7 +201,7 @@ class BookControllerTest {
 
     @Test
     void getBook_shouldReturn200WithBook_whenBookExists() throws Exception {
-        when(bookService.findById(bookId)).thenReturn(book);
+        when(bookService.findById(bookId)).thenReturn(BookMapper.toDto(book));
 
         mockMvc.perform(get("/api/v1/books/{id}", bookId))
                 .andExpect(status().isOk())
@@ -244,7 +245,7 @@ class BookControllerTest {
                 .stockQuantity(10)
                 .build();
 
-        when(bookService.update(eq(bookId), any(UpdateBookRequestDto.class))).thenReturn(updatedBook);
+        when(bookService.update(eq(bookId), any(UpdateBookRequestDto.class))).thenReturn(BookMapper.toDto(updatedBook));
 
         mockMvc.perform(patch("/api/v1/books/{id}", bookId)
                         .contentType(MediaType.APPLICATION_JSON)

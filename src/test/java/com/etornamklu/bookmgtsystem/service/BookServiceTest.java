@@ -2,6 +2,7 @@ package com.etornamklu.bookmgtsystem.service;
 
 import com.etornamklu.bookmgtsystem.dto.request.CreateBookRequestDto;
 import com.etornamklu.bookmgtsystem.dto.request.UpdateBookRequestDto;
+import com.etornamklu.bookmgtsystem.dto.response.BookResponseDto;
 import com.etornamklu.bookmgtsystem.exception.ResourceNotFoundException;
 import com.etornamklu.bookmgtsystem.model.Book;
 import com.etornamklu.bookmgtsystem.repository.BookRepository;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -48,54 +50,55 @@ class BookServiceTest {
                 .isbn("978-0132350884")
                 .price(new BigDecimal("39.99"))
                 .stockQuantity(10)
+                .version(1L)
                 .build();
     }
 
 
     @Test
     void findById_shouldReturnBook_whenBookExists() {
-        when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
+        when(bookRepository.findByIdAndDeletedAtIsNull(bookId)).thenReturn(Optional.of(book));
 
-        Book result = bookService.findById(bookId);
+        BookResponseDto result = bookService.findById(bookId);
 
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(bookId);
         assertThat(result.getTitle()).isEqualTo("Clean Code");
-        verify(bookRepository).findById(bookId);
+        verify(bookRepository).findByIdAndDeletedAtIsNull(bookId);
     }
 
     @Test
     void findById_shouldThrowResourceNotFoundException_whenBookNotFound() {
-        when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
+        when(bookRepository.findByIdAndDeletedAtIsNull(bookId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> bookService.findById(bookId))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("Book")
                 .hasMessageContaining("id");
 
-        verify(bookRepository).findById(bookId);
+        verify(bookRepository).findByIdAndDeletedAtIsNull(bookId);
     }
 
 
     @Test
     void findAllByPage_shouldReturnPageOfBooks() {
         Page<Book> bookPage = new PageImpl<>(List.of(book));
-        when(bookRepository.findAll(any(PageRequest.class))).thenReturn(bookPage);
+        when(bookRepository.findAllByDeletedAtIsNull(any(PageRequest.class))).thenReturn(bookPage);
 
-        Page<Book> result = bookService.findAllByPage(0, 20);
+        Page<BookResponseDto> result = bookService.findAllByPage(0, 20);
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent().getFirst().getTitle()).isEqualTo("Clean Code");
-        verify(bookRepository).findAll(PageRequest.of(0, 20, Sort.by("createdAt").descending()));
+        verify(bookRepository).findAllByDeletedAtIsNull(PageRequest.of(0, 20, Sort.by("createdAt").descending()));
     }
 
     @Test
     void findAllByPage_shouldReturnEmptyPage_whenNoBooksExist() {
         Page<Book> emptyPage = new PageImpl<>(List.of());
-        when(bookRepository.findAll(any(PageRequest.class))).thenReturn(emptyPage);
+        when(bookRepository.findAllByDeletedAtIsNull(any(PageRequest.class))).thenReturn(emptyPage);
 
-        Page<Book> result = bookService.findAllByPage(0, 20);
+        Page<BookResponseDto> result = bookService.findAllByPage(0, 20);
 
         assertThat(result.getContent()).isEmpty();
     }
@@ -113,7 +116,7 @@ class BookServiceTest {
 
         when(bookRepository.save(any(Book.class))).thenReturn(book);
 
-        Book result = bookService.create(dto);
+        BookResponseDto result = bookService.create(dto);
 
         assertThat(result).isNotNull();
         assertThat(result.getTitle()).isEqualTo("Clean Code");
@@ -136,7 +139,7 @@ class BookServiceTest {
 
         when(bookRepository.save(any(Book.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Book result = bookService.create(dto);
+        BookResponseDto result = bookService.create(dto);
 
         assertThat(result.getTitle()).isEqualTo("The Pragmatic Programmer");
         assertThat(result.getAuthor()).isEqualTo("Dave Thomas");
@@ -156,10 +159,10 @@ class BookServiceTest {
                 .stockQuantity(20)
                 .build();
 
-        when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
+        when(bookRepository.findByIdAndDeletedAtIsNull(bookId)).thenReturn(Optional.of(book));
         when(bookRepository.save(any(Book.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Book result = bookService.update(bookId, dto);
+        BookResponseDto result = bookService.update(bookId, dto);
 
         assertThat(result.getTitle()).isEqualTo("Updated Title");
         assertThat(result.getAuthor()).isEqualTo("Updated Author");
@@ -175,13 +178,12 @@ class BookServiceTest {
                 .title("New Title Only")
                 .build();
 
-        when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
+        when(bookRepository.findByIdAndDeletedAtIsNull(bookId)).thenReturn(Optional.of(book));
         when(bookRepository.save(any(Book.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Book result = bookService.update(bookId, dto);
+        BookResponseDto result = bookService.update(bookId, dto);
 
         assertThat(result.getTitle()).isEqualTo("New Title Only");
-        // unchanged fields
         assertThat(result.getAuthor()).isEqualTo("Robert C. Martin");
         assertThat(result.getIsbn()).isEqualTo("978-0132350884");
         assertThat(result.getPrice()).isEqualByComparingTo("39.99");
@@ -191,7 +193,7 @@ class BookServiceTest {
     @Test
     void update_shouldThrowResourceNotFoundException_whenBookNotFound() {
         UpdateBookRequestDto dto = UpdateBookRequestDto.builder().title("Whatever").build();
-        when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
+        when(bookRepository.findByIdAndDeletedAtIsNull(bookId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> bookService.update(bookId, dto))
                 .isInstanceOf(ResourceNotFoundException.class);
@@ -199,24 +201,72 @@ class BookServiceTest {
         verify(bookRepository, never()).save(any());
     }
 
+    @Test
+
+    void update_shouldThrowOptimisticLockingException_whenConcurrentUpdateDetected() {
+
+        UpdateBookRequestDto dto = UpdateBookRequestDto.builder()
+                .title("Updated Title")
+                .build();
+        when(bookRepository.findByIdAndDeletedAtIsNull(bookId)).thenReturn(Optional.of(book));
+        when(bookRepository.save(any(Book.class)))
+                .thenThrow(new ObjectOptimisticLockingFailureException(Book.class, bookId));
+        assertThatThrownBy(() -> bookService.update(bookId, dto))
+                .isInstanceOf(ObjectOptimisticLockingFailureException.class);
+        verify(bookRepository).save(book);
+
+    }
 
     @Test
-    void delete_shouldDeleteBook_whenBookExists() {
-        when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
+
+    void update_shouldSucceed_whenNoConcurrentUpdateDetected() {
+        UpdateBookRequestDto dto = UpdateBookRequestDto.builder()
+                .title("Updated Title")
+                .build();
+        Book updatedBook = Book.builder()
+                .id(bookId)
+                .title("Updated Title")
+                .author("Robert C. Martin")
+                .isbn("978-0132350884")
+                .price(new BigDecimal("39.99"))
+                .stockQuantity(10)
+                .version(2L)  // version incremented after successful save
+                .build();
+
+        when(bookRepository.findByIdAndDeletedAtIsNull(bookId)).thenReturn(Optional.of(book));
+        when(bookRepository.save(any(Book.class))).thenReturn(updatedBook);
+
+        var result = bookService.update(bookId, dto);
+        assertThat(result).isNotNull();
+        assertThat(result.getTitle()).isEqualTo("Updated Title");
+        verify(bookRepository).save(book);
+
+    }
+
+
+
+
+    @Test
+    void delete_shouldSoftDeleteBook_whenBookExists() {
+        when(bookRepository.findByIdAndDeletedAtIsNull(bookId)).thenReturn(Optional.of(book));
+        when(bookRepository.save(any(Book.class))).thenReturn(book);
 
         Void result = bookService.delete(bookId);
 
         assertThat(result).isNull();
-        verify(bookRepository).delete(book);
+        assertThat(book.getDeletedAt()).isNotNull();  // tombstone is set
+        verify(bookRepository).save(book);            // save called, not delete
+        verify(bookRepository, never()).delete(any()); // hard delete never called
     }
 
     @Test
     void delete_shouldThrowResourceNotFoundException_whenBookNotFound() {
-        when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
+        when(bookRepository.findByIdAndDeletedAtIsNull(bookId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> bookService.delete(bookId))
                 .isInstanceOf(ResourceNotFoundException.class);
 
+        verify(bookRepository, never()).save(any());
         verify(bookRepository, never()).delete(any());
     }
 }
