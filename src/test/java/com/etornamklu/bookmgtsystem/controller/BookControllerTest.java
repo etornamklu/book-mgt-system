@@ -206,7 +206,7 @@ class BookControllerTest {
         mockMvc.perform(get("/api/v1/books/{id}", bookId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("Books retrieved successfully"))
+                .andExpect(jsonPath("$.message").value("Book retrieved successfully"))
                 .andExpect(jsonPath("$.data.title").value("Clean Code"))
                 .andExpect(jsonPath("$.data.isbn").value("978-0132350884"));
 
@@ -284,7 +284,7 @@ class BookControllerTest {
         mockMvc.perform(delete("/api/v1/books/{id}", bookId))
                 .andExpect(status().isNoContent())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("Book updated successfully"));
+                .andExpect(jsonPath("$.message").value("Book deleted successfully"));
 
         verify(bookService).delete(bookId);
     }
