@@ -81,10 +81,7 @@ public class BookService {
         log.info("Creating new book: {}", dto.getTitle());
         Book book = Book.builder()
                 .title(dto.getTitle())
-                .author(dto.getAuthor())
-                .isbn(dto.getIsbn())
                 .price(dto.getPrice())
-                .stockQuantity(dto.getStockQuantity())
                 .coverImage(dto.getCoverImage())
                 .build();
 
@@ -110,10 +107,7 @@ public class BookService {
                 .orElseThrow(() -> new ResourceNotFoundException("Book", "id", id));
 
         if (dto.getTitle() != null) book.setTitle(dto.getTitle());
-        if (dto.getAuthor() != null) book.setAuthor(dto.getAuthor());
-        if (dto.getIsbn() != null) book.setIsbn(dto.getIsbn());
         if (dto.getPrice() != null) book.setPrice(dto.getPrice());
-        if (dto.getStockQuantity() != null) book.setStockQuantity(dto.getStockQuantity());
         if (dto.getCoverImage() != null) book.setCoverImage(dto.getCoverImage());
 
         bookRepository.save(book);

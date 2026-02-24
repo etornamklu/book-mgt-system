@@ -15,36 +15,16 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateBookRequestDto {
-
     /**
      * Updated title of the book.
      * Optional; if null, the title will remain unchanged.
      */
     private String title;
-
-    /**
-     * Updated author of the book.
-     * Optional; if null, the author will remain unchanged.
-     */
-    private String author;
-
-    /**
-     * Updated International Standard Book Number (ISBN) of the book.
-     * Optional; if null, the ISBN will remain unchanged.
-     */
-    private String isbn;
-
     /**
      * Updated price of the book.
      * Optional; if null, the price will remain unchanged.
      */
     private BigDecimal price;
-
-    /**
-     * Updated stock quantity of the book.
-     * Optional; if null, the stock quantity will remain unchanged.
-     */
-    private Integer stockQuantity;
 
     /**
      * Updated cover image of the book stored as a byte array.

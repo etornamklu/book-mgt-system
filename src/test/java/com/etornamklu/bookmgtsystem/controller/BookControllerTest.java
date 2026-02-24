@@ -57,10 +57,7 @@ class BookControllerTest {
         book = Book.builder()
                 .id(bookId)
                 .title("Clean Code")
-                .author("Robert C. Martin")
-                .isbn("978-0132350884")
                 .price(new BigDecimal("39.99"))
-                .stockQuantity(10)
                 .build();
     }
 
@@ -77,8 +74,7 @@ class BookControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("Books retrieved successfully"))
-                .andExpect(jsonPath("$.data.content[0].title").value("Clean Code"))
-                .andExpect(jsonPath("$.data.content[0].author").value("Robert C. Martin"));
+                .andExpect(jsonPath("$.data.content[0].title").value("Clean Code"));
 
         verify(bookService).findAllByPage(0, 20);
     }
@@ -102,10 +98,7 @@ class BookControllerTest {
     void createBook_shouldReturn200WithCreatedBook() throws Exception {
         CreateBookRequestDto dto = CreateBookRequestDto.builder()
                 .title("Clean Code")
-                .author("Robert C. Martin")
-                .isbn("978-0132350884")
                 .price(new BigDecimal("39.99"))
-                .stockQuantity(10)
                 .build();
 
         when(bookService.create(any(CreateBookRequestDto.class))).thenReturn(BookMapper.toDto(book));
@@ -116,8 +109,7 @@ class BookControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("Book created successfully"))
-                .andExpect(jsonPath("$.data.title").value("Clean Code"))
-                .andExpect(jsonPath("$.data.author").value("Robert C. Martin"));
+                .andExpect(jsonPath("$.data.title").value("Clean Code"));
 
         verify(bookService).create(any(CreateBookRequestDto.class));
     }
@@ -126,9 +118,7 @@ class BookControllerTest {
     void createBook_shouldReturn400_whenTitleIsBlank() throws Exception {
         CreateBookRequestDto dto = CreateBookRequestDto.builder()
                 .title("")
-                .author("Some Author")
                 .price(new BigDecimal("9.99"))
-                .stockQuantity(1)
                 .build();
 
         mockMvc.perform(post("/api/v1/books")
@@ -142,30 +132,10 @@ class BookControllerTest {
     }
 
     @Test
-    void createBook_shouldReturn400_whenAuthorIsBlank() throws Exception {
-        CreateBookRequestDto dto = CreateBookRequestDto.builder()
-                .title("Some Title")
-                .author("")
-                .price(new BigDecimal("9.99"))
-                .stockQuantity(1)
-                .build();
-
-        mockMvc.perform(post("/api/v1/books")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.success").value(false));
-
-        verify(bookService, never()).create(any());
-    }
-
-    @Test
     void createBook_shouldReturn400_whenPriceIsNegative() throws Exception {
         CreateBookRequestDto dto = CreateBookRequestDto.builder()
                 .title("Some Title")
-                .author("Some Author")
                 .price(new BigDecimal("-5.00"))
-                .stockQuantity(1)
                 .build();
 
         mockMvc.perform(post("/api/v1/books")
@@ -177,23 +147,6 @@ class BookControllerTest {
         verify(bookService, never()).create(any());
     }
 
-    @Test
-    void createBook_shouldReturn400_whenStockQuantityIsNegative() throws Exception {
-        CreateBookRequestDto dto = CreateBookRequestDto.builder()
-                .title("Some Title")
-                .author("Some Author")
-                .price(new BigDecimal("9.99"))
-                .stockQuantity(-1)
-                .build();
-
-        mockMvc.perform(post("/api/v1/books")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.success").value(false));
-
-        verify(bookService, never()).create(any());
-    }
 
     // -------------------------
     // GET /api/v1/books/{id}
@@ -207,8 +160,7 @@ class BookControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("Book retrieved successfully"))
-                .andExpect(jsonPath("$.data.title").value("Clean Code"))
-                .andExpect(jsonPath("$.data.isbn").value("978-0132350884"));
+                .andExpect(jsonPath("$.data.title").value("Clean Code"));
 
         verify(bookService).findById(bookId);
     }
@@ -239,10 +191,7 @@ class BookControllerTest {
         Book updatedBook = Book.builder()
                 .id(bookId)
                 .title("Updated Title")
-                .author("Robert C. Martin")
-                .isbn("978-0132350884")
                 .price(new BigDecimal("49.99"))
-                .stockQuantity(10)
                 .build();
 
         when(bookService.update(eq(bookId), any(UpdateBookRequestDto.class))).thenReturn(BookMapper.toDto(updatedBook));
