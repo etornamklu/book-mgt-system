@@ -22,7 +22,6 @@ public class BookMapper {
                 .id(book.getId())
                 .title(book.getTitle())
                 .price(book.getPrice())
-                .coverImage(book.getCoverImage())
                 .createdAt(book.getCreatedAt())
                 .updatedAt(book.getUpdatedAt())
                 .build();

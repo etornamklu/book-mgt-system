@@ -1,5 +1,6 @@
 package com.etornamklu.bookmgtsystem.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -36,5 +37,9 @@ public class CreateBookRequestDto {
     /**
      * Optional cover image of the book stored as a byte array.
      */
-    private byte[] coverImage;
+    @Schema(
+            description = "Base64 encoded cover image",
+            example = "/9j/4AAQSkZJRgABAQAAAQABAAD..."
+    )
+    private String coverImage;
 }

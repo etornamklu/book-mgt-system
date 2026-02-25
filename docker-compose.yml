@@ -1,6 +1,7 @@
 services:
   mysql:
     image: mysql:8.0.38
+    restart: unless-stopped
     container_name: books-mysql
     environment:
       MYSQL_DATABASE: book_mgt

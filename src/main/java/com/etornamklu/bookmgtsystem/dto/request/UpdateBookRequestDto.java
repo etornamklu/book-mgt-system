@@ -1,5 +1,6 @@
 package com.etornamklu.bookmgtsystem.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -30,5 +31,9 @@ public class UpdateBookRequestDto {
      * Updated cover image of the book stored as a byte array.
      * Optional; if null, the cover image will remain unchanged.
      */
-    private byte[] coverImage;
+    @Schema(
+            description = "Base64 encoded cover image",
+            example = "/9j/4AAQSkZJRgABAQAAAQABAAD..."
+    )
+    private String coverImage;
 }

@@ -28,29 +28,9 @@ public class BookResponseDto {
     private String title;
 
     /**
-     * Author of the book.
-     */
-    private String author;
-
-    /**
-     * International Standard Book Number (ISBN) of the book.
-     */
-    private String isbn;
-
-    /**
      * Price of the book in local currency.
      */
     private BigDecimal price;
-
-    /**
-     * Quantity of books available in stock.
-     */
-    private Integer stockQuantity;
-
-    /**
-     * Cover image of the book stored as a byte array.
-     */
-    private byte[] coverImage;
 
     /**
      * Timestamp when the book was created.

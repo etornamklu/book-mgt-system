@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.UUID;
 
 /**
@@ -79,10 +80,13 @@ public class BookService {
     @Transactional
     public BookResponseDto create(CreateBookRequestDto dto) {
         log.info("Creating new book: {}", dto.getTitle());
+        byte[] imageBytes = dto.getCoverImage() != null
+                ? Base64.getDecoder().decode(dto.getCoverImage())
+                : null;
         Book book = Book.builder()
                 .title(dto.getTitle())
                 .price(dto.getPrice())
-                .coverImage(dto.getCoverImage())
+                .coverImage(imageBytes)
                 .build();
 
         bookRepository.save(book);
@@ -98,7 +102,7 @@ public class BookService {
      * @param id  the UUID of the book to update
      * @param dto the {@link UpdateBookRequestDto} containing updated book details
      * @return the {@link BookResponseDto} representing the updated book
-     * @throws ResourceNotFoundException if no book with the given ID exists or it is deleted
+     * @throws ResourceNotFoundException if no book with the given ID exists, or it is deleted
      */
     @CacheEvict(value = {"books", "books-page"}, allEntries = true)
     @Transactional
@@ -106,9 +110,13 @@ public class BookService {
         Book book = bookRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Book", "id", id));
 
+        byte[] imageBytes = dto.getCoverImage() != null
+                ? Base64.getDecoder().decode(dto.getCoverImage())
+                : null;
+
         if (dto.getTitle() != null) book.setTitle(dto.getTitle());
         if (dto.getPrice() != null) book.setPrice(dto.getPrice());
-        if (dto.getCoverImage() != null) book.setCoverImage(dto.getCoverImage());
+        if (imageBytes != null) book.setCoverImage(imageBytes);
 
         bookRepository.save(book);
         return BookMapper.toDto(book);
