@@ -68,7 +68,7 @@ public class BookController {
     @PostMapping
     @Operation(
             summary = "Create book",
-            description = "Create a new book. Mandatory fields: title, author, price, stockQuantity. Optional: isbn, coverImage.",
+            description = "Create a new book. Mandatory fields: title, price. Optional: coverImage (Base64 encoded image).",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     required = true,
                     description = "Book creation payload",

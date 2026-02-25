@@ -46,10 +46,7 @@ class BookIntegrationTest {
 
         createDto = CreateBookRequestDto.builder()
                 .title("Clean Code")
-                .author("Robert C. Martin")
-                .isbn("978-0132350884")
                 .price(new BigDecimal("39.99"))
-                .stockQuantity(10)
                 .build();
     }
 
@@ -65,7 +62,6 @@ class BookIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.title").value("Clean Code"))
-                .andExpect(jsonPath("$.data.author").value("Robert C. Martin"))
                 .andExpect(jsonPath("$.data.id").isNotEmpty());
 
         assertThat(bookRepository.count()).isEqualTo(1);
@@ -91,8 +87,8 @@ class BookIntegrationTest {
 
     @Test
     void getAllBooks_shouldReturnPagedResults() throws Exception {
-        bookRepository.save(Book.builder().title("Book A").author("Author A").price(new BigDecimal("10.00")).stockQuantity(5).build());
-        bookRepository.save(Book.builder().title("Book B").author("Author B").price(new BigDecimal("20.00")).stockQuantity(3).build());
+        bookRepository.save(Book.builder().title("Book A").price(new BigDecimal("10.00")).build());
+        bookRepository.save(Book.builder().title("Book B").price(new BigDecimal("20.00")).build());
 
         mockMvc.perform(get("/api/v1/books"))
                 .andExpect(status().isOk())
@@ -124,9 +120,7 @@ class BookIntegrationTest {
         for (int i = 1; i <= 5; i++) {
             bookRepository.save(Book.builder()
                     .title("Book " + i)
-                    .author("Author " + i)
                     .price(new BigDecimal("10.00"))
-                    .stockQuantity(i)
                     .build());
         }
 
@@ -202,8 +196,7 @@ class BookIntegrationTest {
                         .content(objectMapper.writeValueAsString(updateDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.title").value("Updated Title"))
-                .andExpect(jsonPath("$.data.price").value(59.99))
-                .andExpect(jsonPath("$.data.author").value("Robert C. Martin")); // unchanged
+                .andExpect(jsonPath("$.data.price").value(59.99));
     }
 
     @Test

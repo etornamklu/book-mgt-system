@@ -1,5 +1,6 @@
 package com.etornamklu.bookmgtsystem.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -15,25 +16,11 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateBookRequestDto {
-
     /**
      * Updated title of the book.
      * Optional; if null, the title will remain unchanged.
      */
     private String title;
-
-    /**
-     * Updated author of the book.
-     * Optional; if null, the author will remain unchanged.
-     */
-    private String author;
-
-    /**
-     * Updated International Standard Book Number (ISBN) of the book.
-     * Optional; if null, the ISBN will remain unchanged.
-     */
-    private String isbn;
-
     /**
      * Updated price of the book.
      * Optional; if null, the price will remain unchanged.
@@ -41,14 +28,12 @@ public class UpdateBookRequestDto {
     private BigDecimal price;
 
     /**
-     * Updated stock quantity of the book.
-     * Optional; if null, the stock quantity will remain unchanged.
-     */
-    private Integer stockQuantity;
-
-    /**
      * Updated cover image of the book stored as a byte array.
      * Optional; if null, the cover image will remain unchanged.
      */
-    private byte[] coverImage;
+    @Schema(
+            description = "Base64 encoded cover image",
+            example = "/9j/4AAQSkZJRgABAQAAAQABAAD..."
+    )
+    private String coverImage;
 }

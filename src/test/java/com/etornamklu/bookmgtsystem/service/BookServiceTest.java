@@ -46,10 +46,7 @@ class BookServiceTest {
         book = Book.builder()
                 .id(bookId)
                 .title("Clean Code")
-                .author("Robert C. Martin")
-                .isbn("978-0132350884")
                 .price(new BigDecimal("39.99"))
-                .stockQuantity(10)
                 .version(1L)
                 .build();
     }
@@ -108,10 +105,7 @@ class BookServiceTest {
     void create_shouldSaveAndReturnBook() {
         CreateBookRequestDto dto = CreateBookRequestDto.builder()
                 .title("Clean Code")
-                .author("Robert C. Martin")
-                .isbn("978-0132350884")
                 .price(new BigDecimal("39.99"))
-                .stockQuantity(10)
                 .build();
 
         when(bookRepository.save(any(Book.class))).thenReturn(book);
@@ -120,10 +114,7 @@ class BookServiceTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getTitle()).isEqualTo("Clean Code");
-        assertThat(result.getAuthor()).isEqualTo("Robert C. Martin");
-        assertThat(result.getIsbn()).isEqualTo("978-0132350884");
         assertThat(result.getPrice()).isEqualByComparingTo("39.99");
-        assertThat(result.getStockQuantity()).isEqualTo(10);
         verify(bookRepository).save(any(Book.class));
     }
 
@@ -131,10 +122,7 @@ class BookServiceTest {
     void create_shouldBuildBookWithAllFieldsFromDto() {
         CreateBookRequestDto dto = CreateBookRequestDto.builder()
                 .title("The Pragmatic Programmer")
-                .author("Dave Thomas")
-                .isbn("978-0135957059")
                 .price(new BigDecimal("49.99"))
-                .stockQuantity(5)
                 .build();
 
         when(bookRepository.save(any(Book.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -142,10 +130,7 @@ class BookServiceTest {
         BookResponseDto result = bookService.create(dto);
 
         assertThat(result.getTitle()).isEqualTo("The Pragmatic Programmer");
-        assertThat(result.getAuthor()).isEqualTo("Dave Thomas");
-        assertThat(result.getIsbn()).isEqualTo("978-0135957059");
         assertThat(result.getPrice()).isEqualByComparingTo("49.99");
-        assertThat(result.getStockQuantity()).isEqualTo(5);
     }
 
 
@@ -153,10 +138,7 @@ class BookServiceTest {
     void update_shouldUpdateAllFields_whenAllFieldsProvided() {
         UpdateBookRequestDto dto = UpdateBookRequestDto.builder()
                 .title("Updated Title")
-                .author("Updated Author")
-                .isbn("000-0000000000")
                 .price(new BigDecimal("59.99"))
-                .stockQuantity(20)
                 .build();
 
         when(bookRepository.findByIdAndDeletedAtIsNull(bookId)).thenReturn(Optional.of(book));
@@ -165,10 +147,7 @@ class BookServiceTest {
         BookResponseDto result = bookService.update(bookId, dto);
 
         assertThat(result.getTitle()).isEqualTo("Updated Title");
-        assertThat(result.getAuthor()).isEqualTo("Updated Author");
-        assertThat(result.getIsbn()).isEqualTo("000-0000000000");
         assertThat(result.getPrice()).isEqualByComparingTo("59.99");
-        assertThat(result.getStockQuantity()).isEqualTo(20);
         verify(bookRepository).save(book);
     }
 
@@ -184,10 +163,7 @@ class BookServiceTest {
         BookResponseDto result = bookService.update(bookId, dto);
 
         assertThat(result.getTitle()).isEqualTo("New Title Only");
-        assertThat(result.getAuthor()).isEqualTo("Robert C. Martin");
-        assertThat(result.getIsbn()).isEqualTo("978-0132350884");
         assertThat(result.getPrice()).isEqualByComparingTo("39.99");
-        assertThat(result.getStockQuantity()).isEqualTo(10);
     }
 
     @Test
@@ -226,10 +202,7 @@ class BookServiceTest {
         Book updatedBook = Book.builder()
                 .id(bookId)
                 .title("Updated Title")
-                .author("Robert C. Martin")
-                .isbn("978-0132350884")
                 .price(new BigDecimal("39.99"))
-                .stockQuantity(10)
                 .version(2L)  // version incremented after successful save
                 .build();
 

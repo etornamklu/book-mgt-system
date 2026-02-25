@@ -52,19 +52,6 @@ public class Book {
     private String title;
 
     /**
-     * Author of the book.
-     */
-    @NotBlank
-    @Column(nullable = false, length = 100)
-    private String author;
-
-    /**
-     * International Standard Book Number (ISBN), must be unique if present.
-     */
-    @Column(length = 20, unique = true)
-    private String isbn;
-
-    /**
      * Price of the book in the local currency.
      * Must be a positive value.
      */
@@ -72,12 +59,6 @@ public class Book {
     @Column(precision = 10, scale = 2)
     private BigDecimal price;
 
-    /**
-     * Quantity of stock available for this book.
-     * Must be zero or positive.
-     */
-    @PositiveOrZero
-    private Integer stockQuantity;
 
     /**
      * Cover image of the book stored as a binary large object (BLOB).
